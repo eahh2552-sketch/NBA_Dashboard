@@ -1,404 +1,157 @@
-import glob
-import os
-import numpy as np
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 import streamlit as st
 
-st.set_page_config(
-    page_title="NBA Analytic Dashboard",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
-
-
-# Carga de archivos (.csv o .xlsx)
-def cargar_archivos_carpeta():
-  archivos = glob.glob("*.csv") + glob.glob("*.xlsx")
-  df_j, df_e = None, None
-  for f in archivos:
-    df_temp = pd.read_csv(f) if f.endswith(".csv") else pd.read_excel(f)
-    cols = [str(c).lower() for c in df_temp.columns]
-
-    # Identificar dataset de jugadores vs equipos
-    if any(k in cols for k in ["player", "jugador", "pts"]):
-      df_j = df_temp
-    elif any(
-        k in cols
-        for k in [
-            "team",
-            "win%",
-            "w-l%",
-            "franchise",
-        ]
-    ):
-      df_e = df_temp
-  return df_j, df_e
-
-
-df_jugadores, df_equipos = cargar_archivos_carpeta()
-
-if df_jugadores is None:
-  st.error(
-      f"Archivos detectados en la carpeta actual ({os.getcwd()}):"
-      f" {os.listdir('.')}"
-  )
-  st.stop()
-
-# ---------------------------------------------------------
-# BARRA LATERAL (FILTROS INDEPENDIENTES)
-# ---------------------------------------------------------
-st.sidebar.title("Filtros del Dashboard")
-
-# FILTRO 1: EQUIPOS 
-st.sidebar.markdown("### 🏀 Filtro de Equipos")
-col_team_e = None
-df_e_filtrado = df_equipos.copy() if df_equipos is not None else None
-
-if df_equipos is not None:
-  col_team_e = next(
-      (
-          c
-          for c in df_equipos.columns
-          if c.lower() in ["team"]
-      ),
-      df_equipos.columns[0],
-  )
-  equipos_disponibles = sorted(df_equipos[col_team_e].dropna().unique())
-  equipos_sel = st.sidebar.multiselect(
-      "Seleccionar Equipo(s):",
-      options=equipos_disponibles,
-      default=equipos_disponibles,
-      key="filtro_equipos_sidebar",
-  )
-  df_e_filtrado = df_equipos[df_equipos[col_team_e].isin(equipos_sel)]
-
-st.sidebar.divider()
-
-# --- FILTRO 2: JUGADORES ---
-st.sidebar.markdown("### 👤 Filtro de Jugadores")
-col_player = next(
-    (
-        c
-        for c in df_jugadores.columns
-        if c.lower() in ["player"]
-    ),
-    df_jugadores.columns[0],
-)
-col_team_j = next(
-    (
-        c
-        for c in df_jugadores.columns
-        if c.lower() in ["team"]
-    ),
-    None,
-)
-
-df_j_filtrado = df_jugadores.copy()
-if col_team_j and df_equipos is not None and "equipos_sel" in locals():
-  df_j_filtrado = df_j_filtrado[df_j_filtrado[col_team_j].isin(equipos_sel)]
-
-jugadores_disponibles = sorted(df_j_filtrado[col_player].dropna().unique())
-jugadores_sel = st.sidebar.multiselect(
-    "Seleccionar/Comparar Jugador(es):",
-    options=jugadores_disponibles,
-    default=jugadores_disponibles,
-    key="filtro_jugadores_sidebar",
-)
-df_j_filtrado = df_j_filtrado[df_j_filtrado[col_player].isin(jugadores_sel)]
-
-# ---------------------------------------------------------
-# ENCABEZADO Y KPIS
-# ---------------------------------------------------------
+# Configuración básica
+st.set_page_config(page_title="NBA ANALYTIC DASHBOARD", layout="wide")
 st.title("NBA ANALYTIC DASHBOARD")
-
 st.subheader("KPI's de Temporada")
-kpi1, kpi2, kpi3, kpi4 = st.columns(4)
 
-col_pts = next(
-    (
-        c
-        for c in df_jugadores.columns
-        if c.strip().lower() in ["pts"]
-    ),
-    None,
+# Cargar datos
+df_eq = pd.read_csv("nba_equipos_limpio_av.csv")
+df_jug = pd.read_csv("nba_jugadores_limpio_av.csv")
+player_col = "Player" if "Player" in df_jug.columns else df_jug.columns[0]
+
+# Filtros de barra lateral
+st.sidebar.header("Filtros")
+eq_opts = [
+    t for t in df_eq["Team"].unique() if str(t).lower() != "league average"
+]
+sel_eq = st.sidebar.multiselect("Equipos:", eq_opts, default=eq_opts[:5])
+sel_jug = st.sidebar.multiselect(
+    "Jugadores:",
+    df_jug[player_col].unique(),
+    default=df_jug[player_col].unique()[:5],
 )
-if not col_pts:
-  col_pts = next(
-      (
-          c
-          for c in df_jugadores.columns
-          if "pts" in c.lower() and "36" not in c and "ts" not in c.lower()
-      ),
-      df_jugadores.columns[1],
-  )
 
-col_ts = next(
-    (
-        c
-        for c in df_jugadores.columns
-        if "ts%" in c.lower()
-        or "ts_pct" in c.lower()
-        or "true_shooting" in c.lower()
-        or c.strip().lower() == "ts"
-    ),
-    None,
-)
-if not col_ts:
-  col_ts = next(
-      (
-          c
-          for c in df_jugadores.columns
-          if "ts" in c.lower() and "pts" not in c.lower()
-      ),
-      col_pts,
-  )
-
-col_ast = next(
-    (
-        c
-        for c in df_jugadores.columns
-        if c.strip().lower() in ["ast"]
-        and "36" not in c
-    ),
-    None,
-)
-if not col_ast:
-  col_ast = next(
-      (
-          c
-          for c in df_jugadores.columns
-          if "ast" in c.lower() and "36" not in c
-      ),
-      df_jugadores.columns[2],
-  )
-
-col_reb = next(
-    (
-        c
-        for c in df_jugadores.columns
-        if c.strip().lower() in ["trb"]
-        and "36" not in c
-    ),
-    None,
-)
-if not col_reb:
-  col_reb = next(
-      (
-          c
-          for c in df_jugadores.columns
-          if ("trb" in c.lower() or "reb" in c.lower()) and "36" not in c
-      ),
-      df_jugadores.columns[3],
-  )
-
-if not df_j_filtrado.empty:
-  lider_pts = df_j_filtrado.loc[df_j_filtrado[col_pts].idxmax()]
-  lider_ts = df_j_filtrado.loc[df_j_filtrado[col_ts].idxmax()]
-  lider_ast = df_j_filtrado.loc[df_j_filtrado[col_ast].idxmax()]
-  lider_reb = df_j_filtrado.loc[df_j_filtrado[col_reb].idxmax()]
-
-  val_ts = lider_ts[col_ts]
-  str_ts = f"{val_ts * 100:.1f}%" if val_ts <= 1.0 else f"{val_ts:.1f}%"
-
-  with kpi1:
-    st.metric(
-        label="Líder PTS",
-        value=f"{lider_pts[col_pts]:.1f}",
-        delta=str(lider_pts[col_player]),
-    )
-  with kpi2:
-    st.metric(label="Líder TS%", value=str_ts, delta=str(lider_ts[col_player]))
-  with kpi3:
-    st.metric(
-        label="Líder AST",
-        value=f"{lider_ast[col_ast]:.1f}",
-        delta=str(lider_ast[col_player]),
-    )
-  with kpi4:
-    st.metric(
-        label="Líder REB",
-        value=f"{lider_reb[col_reb]:.1f}",
-        delta=str(lider_reb[col_player]),
+# Validar selecciones vacías
+if not sel_eq:
+    st.warning("Por favor, selecciona al menos un equipo en la barra lateral.")
+if not sel_jug:
+    st.warning(
+        "Por favor, selecciona al menos un jugador en la barra lateral."
     )
 
-st.divider()
+df_e_f = df_eq[df_eq["Team"].isin(sel_eq)]
+df_j_f = df_jug[df_jug[player_col].isin(sel_jug)]
 
-# ---------------------------------------------------------
-# GRÁFICAS 1 Y 2: JUGADORES
-# ---------------------------------------------------------
-st.subheader("Rendimiento de Jugadores")
-col1, col2 = st.columns(2)
+# KPIs
+k1, k2, k3, k4 = st.columns(4)
+row_pts = df_jug.loc[df_jug["PTS"].idxmax()]
+row_ts = df_jug.loc[df_jug["TS%"].idxmax()]
+row_ast = df_jug.loc[df_jug["AST"].idxmax()]
+row_trb = df_jug.loc[df_jug["TRB"].idxmax()]
 
-if not df_j_filtrado.empty:
-  fig1 = px.scatter(
-      df_j_filtrado,
-      x=col_ts,
-      y=col_pts,
-      color=col_player,
-      hover_name=col_player,
-      title="Gráfica 1: Eficiencia de Tiro (TS%) vs Puntos",
-      template="plotly_dark",
-  )
-  fig1.update_layout(showlegend=False)
-  col1.plotly_chart(fig1, use_container_width=True)
+ts_val = row_ts["TS%"] * 100 if row_ts["TS%"] <= 1 else row_ts["TS%"]
 
-  top10 = df_j_filtrado.nlargest(
-      min(10, len(df_j_filtrado)), col_pts
-  ).sort_values(col_pts, ascending=True)
-  fig2 = px.bar(
-      top10,
-      x=col_pts,
-      y=col_player,
-      orientation="h",
-      color=col_pts,
-      color_continuous_scale="Purples",
-      title="Gráfica 2: Top 10 Anotadores",
-      template="plotly_dark",
-  )
-  fig2.update_layout(coloraxis_showscale=False)
-  col2.plotly_chart(fig2, use_container_width=True)
-else:
-  st.warning("No hay datos de jugadores seleccionados.")
+k1.metric("Líder PTS", row_pts["PTS"], row_pts[player_col])
+k2.metric("Líder TS%", f"{ts_val:.1f}%", row_ts[player_col])
+k3.metric("Líder AST", row_ast["AST"], row_ast[player_col])
+k4.metric("Líder TRB", row_trb["TRB"], row_trb[player_col])
+st.markdown("---")
 
-st.divider()
+# Rendimiento de jugadores
+st.header("Rendimiento de jugadores")
+c1, c2 = st.columns(2)
 
-# ---------------------------------------------------------
-# GRÁFICAS 3 Y 4: EQUIPOS
-# ---------------------------------------------------------
-st.subheader("Rendimiento Colectivo de Equipos")
+with c1:
+    st.subheader("1. TS% v PTS")
+    if not df_j_f.empty:
+        fig1 = px.scatter(
+            df_j_f, x="TS%", y="PTS", color=player_col, template="plotly_dark"
+        )
+        st.plotly_chart(fig1, use_container_width=True)
+    else:
+        st.info("Sin jugadores seleccionados.")
 
-if df_e_filtrado is not None and not df_e_filtrado.empty:
-  # 1. Asistencias (AST)
-  col_eq_ast = next(
-      (
-          c
-          for c in df_e_filtrado.columns
-          if c.strip().lower() in ["ast"]
-          or "ast" in c.lower()
-      ),
-      df_e_filtrado.columns[1],
-  )
+with c2:
+    st.subheader("2. Puntos por Partido")
+    df_top_pts = df_jug.sort_values("PTS", ascending=True).tail(10)
+    fig2 = px.bar(
+        df_top_pts,
+        x="PTS",
+        y=player_col,
+        orientation="h",
+        template="plotly_dark",
+    )
+    st.plotly_chart(fig2, use_container_width=True)
 
-  # 2. Porcentaje de victorias (Win%)
-  col_eq_win = next(
-      (
-          c
-          for c in df_e_filtrado.columns
-          if any(k in c.lower() for k in ["win%"])
-          and not any(
-              x in c.lower() for x in ["reb", "trb", "ast", "pts", "opp"]
-          )
-      ),
-      None,
-  )
-  if not col_eq_win:
-    posibles_wins = [
+st.markdown("---")
+
+#  Rendimiento de Equipos
+st.header("Rendimiento de Equipos")
+c3, c4 = st.columns(2)
+
+with c3:
+    st.subheader("3. AST v Win %")
+    if not df_e_f.empty:
+        fig3 = px.scatter(
+            df_e_f,
+            x="AST",
+            y="Win %",
+            hover_name="Team",
+            template="plotly_dark",
+        )
+        st.plotly_chart(fig3, use_container_width=True)
+    else:
+        st.info("Sin equipos seleccionados.")
+
+with c4:
+    st.subheader("4. Puntos Permitidos por Equipo")
+    if not df_e_f.empty:
+        df_es = df_e_f.sort_values("PTS_Permitidos")
+        fig4 = px.line(
+            df_es,
+            x="Team",
+            y="PTS_Permitidos",
+            markers=True,
+            template="plotly_dark",
+        )
+        fig4.add_hline(
+            y=115.6,
+            line_dash="dash",
+            line_color="red",
+            annotation_text="115.6",
+        )
+        fig4.update_xaxes(showticklabels=False)
+        st.plotly_chart(fig4, use_container_width=True)
+    else:
+        st.info("Sin equipos seleccionados.")
+
+st.markdown("---")
+
+# Impacto de jugador por 36 minutos
+st.header("Impacto de jugador por 36 minutos")
+st.subheader("5. Puntos Rebotes y Asistencias por 36 minutos (Máx. 10 jug.)")
+
+if not df_j_f.empty:
+    if len(df_j_f) > 10:
+        st.warning("Limitado a 10 jugadores.")
+        df_subset = df_j_f.head(10)
+    else:
+        df_subset = df_j_f
+
+    cols_36 = [
         c
-        for c in df_e_filtrado.columns
-        if c.strip().lower() in ["w%", "win%", "w_pct", "pct", "w"]
+        for c in ["PTS_36", "AST_36", "TRB_36"]
+        if c in df_subset.columns
     ]
-    col_eq_win = posibles_wins[0] if posibles_wins else df_e_filtrado.columns[2]
+    if cols_36:
+        df_melted = df_subset.melt(
+            id_vars=[player_col],
+            value_vars=cols_36,
+            var_name="Var",
+            value_name="Cant",
+        )
+        fig5 = px.bar(
+            df_melted,
+            x=player_col,
+            y="Cant",
+            color="Var",
+            barmode="group",
+            template="plotly_dark",
+        )
+        st.plotly_chart(fig5, use_container_width=True)
+else:
+    st.info("Sin jugadores seleccionados para esta gráfica.")
 
-  # 3. Puntos Permitidos (Opp PTS / PTS_Opp)
-  col_eq_opp = next(
-      (
-          c
-          for c in df_e_filtrado.columns
-          if any(
-              k in c.lower()
-              for k in [
-                  "pts_permitidos",
-              ]
-          )
-      ),
-      None,
-  )
-  if not col_eq_opp:
-    col_eq_opp = [
-        c
-        for c in df_e_filtrado.columns
-        if df_e_filtrado[c].dtype in ["float64", "int64"]
-        and c not in [col_eq_ast, col_eq_win]
-    ][0]
-
-  col3, col4 = st.columns(2)
-
-  # Gráfica 3: AST vs Win%
-  fig3 = px.scatter(
-      df_e_filtrado,
-      x=col_eq_ast,
-      y=col_eq_win,
-      color=col_team_e,
-      hover_name=col_team_e,
-      title=f"Gráfica 3: {col_eq_ast} vs {col_eq_win} (Porcentaje de Victorias)",
-      template="plotly_dark",
-  )
-  fig3.update_layout(showlegend=False)
-  col3.plotly_chart(fig3, use_container_width=True)
-
-# GRÁFICA 4 Puntos Permitidos
-col_eq_opp = "PTS_Permitidos"
-
-df_eq_sorted = df_e_filtrado.sort_values(
-    by=col_eq_opp, ascending=True
-).reset_index(drop=True)
-promedio_opp_pts = df_eq_sorted[col_eq_opp].mean()
-
-fig4 = go.Figure()
-
-fig4.add_trace(
-    go.Scatter(
-        x=df_eq_sorted[col_team_e],
-        y=df_eq_sorted[col_eq_opp],
-        mode="lines+markers",
-        name=col_eq_opp,
-        line=dict(color="#a855f7", width=2),
-        marker=dict(size=8, color="#c084fc"),
-    )
-)
-
-fig4.add_trace(
-    go.Scatter(
-        x=df_eq_sorted[col_team_e],
-        y=[promedio_opp_pts] * len(df_eq_sorted),
-        mode="lines",
-        name=f"Promedio ({promedio_opp_pts:.1f})",
-        line=dict(color="#ef4444", width=2, dash="dash"),
-    )
-)
-
-fig4.update_layout(
-    title=f"Gráfica 4: Puntos Permitidos por Equipo",
-    template="plotly_dark",
-    xaxis=dict(
-        showticklabels=False, title=""
-    ),  
-    yaxis_title=col_eq_opp,
-    legend=dict(
-        orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1
-    ),
-)
-col4.plotly_chart(fig4, use_container_width=True)
-
-
-# ---------------------------------------------------------
-# GRÁFICA 5: NORMALIZADO POR 36 MINUTOS
-# ---------------------------------------------------------
-st.subheader("Gráfica 5: Impacto Combinado por 36 Minutos")
-if not df_j_filtrado.empty:
-  top10_36m = df_j_filtrado.nlargest(min(10, len(df_j_filtrado)), col_pts)
-  cols_36 = [c for c in df_jugadores.columns if "36" in c]
-  if not cols_36:
-    cols_36 = [col_pts, col_ast, col_reb]
-
-  fig5 = px.bar(
-      top10_36m,
-      x=col_player,
-      y=cols_36,
-      barmode="group",
-      template="plotly_dark",
-      color_discrete_sequence=["#a855f7", "#f97316", "#3b82f6"],
-  )
-  st.plotly_chart(fig5, use_container_width=True)
