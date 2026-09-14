@@ -81,7 +81,7 @@ with c1:
         fig1 = px.scatter(df_j_f, x="TS%", y="PTS", color=player_col, template="plotly_dark")
         st.plotly_chart(fig1, use_container_width=True)
         corr_global = round(df_jug["TS%"].corr(df_jug["PTS"]), 2)
-        st.caption(f"Correlación global: {corr_global}")
+        st.caption(f"Correlación global: {corr_global} o 3%")
     else:
         st.info("Sin jugadores seleccionados.")
 
