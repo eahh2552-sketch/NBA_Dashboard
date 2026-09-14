@@ -124,7 +124,7 @@ with c4:
         df_es = df_e_f.sort_values("PTS_Permitidos")
         fig4 = px.line(
             df_es,
-            x="-",
+            x="Team",
             y="Puntos Permitidos",
             markers=True,
             template="plotly_dark",
