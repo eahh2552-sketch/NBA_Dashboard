@@ -27,7 +27,7 @@ st.sidebar.header("Filtros")
 eq_opts = [
     t for t in df_eq["Team"].unique() if str(t).lower() != "league average"
 ]
-sel_eq = st.sidebar.multiselect("Equipos:", eq_opts, default=eq_opts[:5])
+sel_eq = st.sidebar.multiselect("Equipos:", eq_opts, default=eq_opts[:30])
 sel_jug = st.sidebar.multiselect(
     "Jugadores:",
     df_jug[player_col].unique(),
