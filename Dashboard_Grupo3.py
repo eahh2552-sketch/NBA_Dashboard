@@ -9,11 +9,6 @@ st.set_page_config(page_title="NBA ANALYTIC DASHBOARD", layout="wide")
 st.title("NBA ANALYTIC DASHBOARD")
 st.subheader("KPI's de Temporada")
 
-# Cargar datos
-df_eq = pd.read_csv("nba_equipos_limpio_av.csv")
-df_jug = pd.read_csv("nba_jugadores_limpio_av.csv")
-player_col = "Player" if "Player" in df_jug.columns else df_jug.columns[0]
-
 def to_excel(df_eq, df_jug):
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
@@ -21,6 +16,11 @@ def to_excel(df_eq, df_jug):
         df_jug.to_excel(writer, sheet_name='Jugadores_Filtrados', index=False)
     processed_data = output.getvalue()
     return processed_data
+    
+# Cargar datos
+df_eq = pd.read_csv("nba_equipos_limpio_av.csv")
+df_jug = pd.read_csv("nba_jugadores_limpio_av.csv")
+player_col = "Player" if "Player" in df_jug.columns else df_jug.columns[0]
     
 # Filtros de barra lateral
 st.sidebar.header("Filtros")
@@ -36,8 +36,8 @@ sel_jug = st.sidebar.multiselect(
 st.sidebar.markdown("---")
 st.sidebar.subheader("Exportar")
 
-if not df_e_f.empty or not df_j_f.empty:
-    excel_data = to_excel(df_e_f, df_j_f)
+if not df_jug.empty or not df_eq.empty:
+    excel_data = to_excel(df_jug, df_eq)
     st.sidebar.download_button(
         label="⬇️ Descargar a Excel",
         data=excel_data,
