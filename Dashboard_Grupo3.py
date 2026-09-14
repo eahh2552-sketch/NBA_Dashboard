@@ -14,6 +14,14 @@ df_eq = pd.read_csv("nba_equipos_limpio_av.csv")
 df_jug = pd.read_csv("nba_jugadores_limpio_av.csv")
 player_col = "Player" if "Player" in df_jug.columns else df_jug.columns[0]
 
+def to_excel(df_eq, df_jug):
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df_eq.to_excel(writer, sheet_name='Equipos_Filtrados', index=False)
+        df_jug.to_excel(writer, sheet_name='Jugadores_Filtrados', index=False)
+    processed_data = output.getvalue()
+    return processed_data
+    
 # Filtros de barra lateral
 st.sidebar.header("Filtros")
 eq_opts = [
