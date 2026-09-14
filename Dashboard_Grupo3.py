@@ -79,7 +79,12 @@ with c1:
     st.subheader("1. TS% v PTS")
     if not df_j_f.empty:
         fig1 = px.scatter(
-            df_j_f, x="TS%", y="PTS", color=player_col, trendline="ols", template="plotly_dark"
+            df_j_f,
+            x="TS%",
+            y="PTS",
+            color=player_col,
+            trendline="ols",
+            template="plotly_dark",
         )
         st.plotly_chart(fig1, use_container_width=True)
     else:
