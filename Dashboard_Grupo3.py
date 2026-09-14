@@ -103,7 +103,7 @@ with c3:
             x="AST",
             y="Win %",
             hover_name="Team",
-            trendline="ols"
+            trendline="ols",
             template="plotly_dark",
         )
         st.plotly_chart(fig3, use_container_width=True)
