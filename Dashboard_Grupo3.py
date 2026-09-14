@@ -89,8 +89,8 @@ with c1:
 
     corr_global = round(df_jug["TS%"].corr(df_jug["PTS"]),2)
     st.caption(f"Correlacion global: {corr_global}")
-    else:
-        st.info("Sin jugadores seleccionados.")
+else:
+    st.info("Sin jugadores seleccionados.")
 
 # Grafico 2 Puntos por Partido
 with c2:
