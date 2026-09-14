@@ -125,7 +125,7 @@ with c4:
         fig4 = px.line(
             df_es,
             x="Team",
-            y="Puntos Permitidos",
+            y="PTS_Permitidos",
             markers=True,
             template="plotly_dark",
         )
