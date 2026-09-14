@@ -74,17 +74,19 @@ st.markdown("---")
 st.header("Rendimiento de jugadores")
 c1, c2 = st.columns(2)
 
+# Grafico 1 TS% v PTS
 with c1:
     st.subheader("1. TS% v PTS")
     if not df_j_f.empty:
         fig1 = px.scatter(
             df_j_f, x="TS%", y="PTS", color=player_col, template="plotly_dark"
         )
-        trendline="ols",
+    trendline="ols",
         st.plotly_chart(fig1, use_container_width=True)
     else:
         st.info("Sin jugadores seleccionados.")
 
+# Grafico 2 Puntos por Partido
 with c2:
     st.subheader("2. Puntos por Partido")
     df_top_pts = df_jug.sort_values("PTS", ascending=True).tail(10)
@@ -103,6 +105,7 @@ st.markdown("---")
 st.header("Rendimiento de Equipos")
 c3, c4 = st.columns(2)
 
+# Grafico 3 Ast v Win %
 with c3:
     st.subheader("3. AST v Win %")
     if not df_e_f.empty:
@@ -118,6 +121,7 @@ with c3:
     else:
         st.info("Sin equipos seleccionados.")
 
+# Grafico 4 Puntos Permitidos por Equipo
 with c4:
     st.subheader("4. Puntos Permitidos por Equipo")
     if not df_e_f.empty:
