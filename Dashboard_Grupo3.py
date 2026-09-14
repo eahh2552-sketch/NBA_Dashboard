@@ -36,25 +36,24 @@ sel_jug = st.sidebar.multiselect(
 st.sidebar.markdown("---")
 st.sidebar.subheader("Exportar")
 
-if not df_jug.empty or not df_eq.empty:
-    excel_data = to_excel(df_jug, df_eq)
+df_e_f = df_eq[df_eq["Team"].isin(sel_eq)] if sel_eq else pd.DataFrame(columns=df_eq.columns)
+df_j_f = df_jug[df_jug[player_col].isin(sel_jug)] if sel_jug else pd.DataFrame(columns=df_jug.columns)
+
+if not sel_eq:
+    st.sidebar.warning("Selecciona al menos un equipo.")
+if not sel_jug:
+    st.sidebar.warning("Selecciona al menos un jugador.")
+
+if not df_e_f.empty or not df_j_f.empty:
+    excel_data = to_excel(df_e_f, df_j_f)
     st.sidebar.download_button(
-        label="⬇️ Descargar a Excel",
+        label="📥 Descargar a Excel",
         data=excel_data,
         file_name="nba_datos_filtrados.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 else:
     st.sidebar.warning("No hay datos para ser exportados.")
-# Validar selecciones vacías
-if not sel_eq:
-    st.warning("Por favor, selecciona al menos un equipo en la barra lateral.")
-if not sel_jug:
-    st.warning(
-        "Por favor, selecciona al menos un jugador en la barra lateral."
-    )
-
-df_e_f = df_eq[df_eq["Team"].isin(sel_eq)]
-df_j_f = df_jug[df_jug[player_col].isin(sel_jug)]
 
 # KPIs
 k1, k2, k3, k4 = st.columns(4)
