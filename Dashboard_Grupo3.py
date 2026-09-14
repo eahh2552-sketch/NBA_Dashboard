@@ -62,6 +62,8 @@ row_ts = df_jug.loc[df_jug["TS%"].idxmax()]
 row_ast = df_jug.loc[df_jug["AST"].idxmax()]
 row_trb = df_jug.loc[df_jug["TRB"].idxmax()]
 
+ts_val = row_ts["TS%"] * 100 if row_ts["TS%"] <= 1 else row_ts["TS%"]
+
 k1.metric("Líder PTS", row_pts["PTS"], row_pts[player_col])
 k2.metric("Líder TS%", f"{ts_val:.1f}%", row_ts[player_col])
 k3.metric("Líder AST", row_ast["AST"], row_ast[player_col])
