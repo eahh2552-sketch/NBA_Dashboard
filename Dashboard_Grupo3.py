@@ -1,6 +1,8 @@
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+import numpy as np
+import io
 
 # Configuración básica
 st.set_page_config(page_title="NBA ANALYTIC DASHBOARD", layout="wide")
@@ -23,7 +25,18 @@ sel_jug = st.sidebar.multiselect(
     df_jug[player_col].unique(),
     default=df_jug[player_col].unique()[:5],
 )
+st.sidebar.markdown("---")
+st.sidebar.subheader("Exportar")
 
+if not df_e_f.empty or not df_j_f.empty:
+    excel_data = to_excel(df_e_f, df_j_f)
+    st.sidebar.download_button(
+        label="⬇️ Descargar a Excel",
+        data=excel_data,
+        file_name="nba_datos_filtrados.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+else:
+    st.sidebar.warning("No hay datos para ser exportados.")
 # Validar selecciones vacías
 if not sel_eq:
     st.warning("Por favor, selecciona al menos un equipo en la barra lateral.")
@@ -90,6 +103,7 @@ with c3:
             x="AST",
             y="Win %",
             hover_name="Team",
+            trendline="ols"
             template="plotly_dark",
         )
         st.plotly_chart(fig3, use_container_width=True)
@@ -154,4 +168,22 @@ if not df_j_f.empty:
         st.plotly_chart(fig5, use_container_width=True)
 else:
     st.info("Sin jugadores seleccionados para esta gráfica.")
+# Estadisticas Descriptivas 
+st.markdown("---")
+st.header("Estadísticas Descriptivas")
 
+col_desc1, col_desc2 = st.columns(2)
+
+with col_desc1:
+    st.subheader("Equipos filtrados")
+    if not df_e_f.empty:
+        st.dataframe(df_e_f.describe(), use_container_width=True)
+    else:
+        st.info("Sin equipos seleccionados.")
+
+with col_desc2:
+    st.subheader("Jugadores filtrados")
+    if not df_j_f.empty:
+        st.dataframe(df_j_f.describe(), use_container_width=True)
+    else:
+        st.info("Sin jugadores seleccionados.")
