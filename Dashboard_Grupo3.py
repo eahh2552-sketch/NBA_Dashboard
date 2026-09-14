@@ -84,6 +84,7 @@ with c1:
             y="PTS",
             color=player_col,
             trendline="ols",
+            trendline_scope="overall",
             template="plotly_dark",
         )
         st.plotly_chart(fig1, use_container_width=True)
