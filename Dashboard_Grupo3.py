@@ -135,7 +135,8 @@ with c4:
             line_color="red",
             annotation_text="115.6",
         )
-        fig4.update_xaxes(showticklabels=False)
+        fig4.update_xaxes(showticklabels=False, title=None)
+        fig4.update_yaxes(title_text="Puntos Permitidos")
         st.plotly_chart(fig4, use_container_width=True)
     else:
         st.info("Sin equipos seleccionados.")
