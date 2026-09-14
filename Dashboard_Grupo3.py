@@ -83,11 +83,12 @@ with c1:
             x="TS%",
             y="PTS",
             color=player_col,
-            trendline="ols",
-            trendline_scope="overall",
             template="plotly_dark",
         )
         st.plotly_chart(fig1, use_container_width=True)
+
+    corr_global = round(df_jug["TS%"].corr(df_jug["PTS"]),2)
+    st.caption(f"Correlacion global: {corr_global}")
     else:
         st.info("Sin jugadores seleccionados.")
 
