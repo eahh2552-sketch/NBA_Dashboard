@@ -121,11 +121,10 @@ with c3:
 with c4:
     st.subheader("4. Puntos Permitidos por Equipo")
     if not df_e_f.empty:
-        df_es = df_e_f.sort_values("PTS_Permitidos")
+        df_es = df_e_f.sort_values("Puntos Permitidos")
         fig4 = px.line(
             df_es,
-            x="Team",
-            y="PTS_Permitidos",
+            y="Puntos Permitidos",
             markers=True,
             template="plotly_dark",
         )
