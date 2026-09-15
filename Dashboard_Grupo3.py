@@ -57,7 +57,7 @@ if not sel_jug:
 if not df_e_f.empty or not df_j_f.empty:
   excel_data = to_excel(df_e_f, df_j_f)
   st.sidebar.download_button(
-      label="📥 Descargar a Excel",
+      label="📥 Descargar a Estadisticas Descriptivas a Excel",
       data=excel_data,
       file_name="nba_datos_filtrados.xlsx",
       mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -79,21 +79,20 @@ k3.metric("Líder AST", row_ast["AST"], row_ast[player_col])
 k4.metric("Líder TRB", row_trb["TRB"], row_trb[player_col])
 st.markdown("---")
 
-# TABS PRINCIPALES
+# Tabs
 tab_jugadores, tab_equipos, tab_stats = st.tabs([
     " Rendimiento de Jugadores",
     " Rendimiento de Equipos",
     " Estadísticas Descriptivas",
 ])
 
-# ==========================================
-# TAB 1: RENDIMIENTO DE JUGADORES
-# ==========================================
+# Tab 1: Estadisticas de Jugadores
+
 with tab_jugadores:
   st.header("Rendimiento de jugadores")
   c1, c2 = st.columns(2)
 
-  # Grafico 1 TS% v PTS
+# Grafico 1 TS% v PTS
   with c1:
     st.subheader("1. TS% v PTS")
     if not df_j_f.empty:
@@ -106,7 +105,7 @@ with tab_jugadores:
     else:
       st.info("Sin jugadores seleccionados.")
 
-  # Grafico 2 Puntos por Partido
+# Grafico 2 Puntos por Partido
   with c2:
     st.subheader("2. Puntos por Partido")
     df_top_pts = df_jug.sort_values("PTS", ascending=True).tail(10)
@@ -121,7 +120,7 @@ with tab_jugadores:
 
   st.markdown("---")
 
-  # Impacto de jugador por 36 minutos
+# Impacto de jugador por 36 minutos
   st.header("Impacto de jugador por 36 minutos")
   st.subheader(
       "5. Puntos Rebotes y Asistencias por 36 minutos (Máx. 10 jug.)"
@@ -158,14 +157,14 @@ with tab_jugadores:
   else:
     st.info("Sin jugadores seleccionados para esta gráfica.")
 
-# ==========================================
-# TAB 2: RENDIMIENTO DE EQUIPOS
-# ==========================================
+
+# Tab 2: Estadísticas Equipos
+
 with tab_equipos:
   st.header("Rendimiento de Equipos")
   c3, c4 = st.columns(2)
 
-  # Grafico 3 Ast v Win %
+# Grafico 3 Ast v Win %
   with c3:
     st.subheader("3. AST v Win %")
     if not df_e_f.empty:
@@ -205,9 +204,9 @@ with tab_equipos:
     else:
       st.info("Sin equipos seleccionados.")
 
-# ==========================================
-# TAB 3: ESTADÍSTICAS DESCRIPTIVAS
-# ==========================================
+
+# Tab 3: Estadisticas Descriptivas
+
 with tab_stats:
   st.markdown("---")
   st.header("Estadísticas Descriptivas")
