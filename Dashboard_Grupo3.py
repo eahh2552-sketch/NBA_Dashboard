@@ -57,7 +57,7 @@ if not sel_jug:
 if not df_e_f.empty or not df_j_f.empty:
   excel_data = to_excel(df_e_f, df_j_f)
   st.sidebar.download_button(
-      label="📥 Descargar a Estadisticas Descriptivas a Excel",
+      label="📥 Descargar Estadísticas Descriptivas a Excel",
       data=excel_data,
       file_name="nba_datos_filtrados.xlsx",
       mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
