@@ -94,7 +94,7 @@ with tab_jugadores:
 
 # Grafico 1 TS% v PTS
   with c1:
-    st.subheader(" * True Shooting% v PTS ")
+    st.subheader("|> True Shooting% v PTS ")
     if not df_j_f.empty:
       fig1 = px.scatter(
           df_j_f, x="TS%", y="PTS", color=player_col, template="plotly_dark"
