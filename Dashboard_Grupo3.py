@@ -9,7 +9,6 @@ st.set_page_config(page_title="NBA ANALYTIC DASHBOARD", layout="wide")
 st.title("NBA ANALYTIC DASHBOARD")
 st.subheader("KPI's de Temporada")
 
-
 def to_excel(df_eq, df_jug):
   output = io.BytesIO()
   with pd.ExcelWriter(output, engine="openpyxl") as writer:
@@ -17,7 +16,6 @@ def to_excel(df_eq, df_jug):
     df_jug.to_excel(writer, sheet_name="Jugadores_Filtrados", index=False)
   processed_data = output.getvalue()
   return processed_data
-
 
 # Cargar datos
 df_eq = pd.read_csv("nba_equipos_limpio_av.csv")
@@ -157,7 +155,6 @@ with tab_jugadores:
   else:
     st.info("Sin jugadores seleccionados para esta gráfica.")
 
-
 # Tab 2: Estadísticas Equipos
 
 with tab_equipos:
@@ -203,7 +200,6 @@ with tab_equipos:
       st.plotly_chart(fig4, use_container_width=True)
     else:
       st.info("Sin equipos seleccionados.")
-
 
 # Tab 3: Estadisticas Descriptivas
 
