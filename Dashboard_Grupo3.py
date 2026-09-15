@@ -94,7 +94,7 @@ with tab_jugadores:
 
 # Grafico 1 TS% v PTS
   with c1:
-    st.subheader("❑ True Shooting % vs PTS ")
+    st.subheader("■ True Shooting % vs PTS ")
     if not df_j_f.empty:
       fig1 = px.scatter(
           df_j_f, x="TS%", y="PTS", color=player_col, template="plotly_dark"
@@ -107,7 +107,7 @@ with tab_jugadores:
 
 # Grafico 2 Puntos por Partido
   with c2:
-    st.subheader("❑ Puntos por Partido ")
+    st.subheader("■ Puntos por Partido ")
     df_top_pts = df_jug.sort_values("PTS", ascending=True).tail(10)
     fig2 = px.bar(
         df_top_pts,
@@ -121,7 +121,7 @@ with tab_jugadores:
   st.markdown("---")
 
 # Impacto de jugador por 36 minutos
-  st.header("Impacto de jugador por 36 minutos")
+  st.header("■ Impacto de jugador por 36 minutos")
   st.subheader(
       "5. Puntos Rebotes y Asistencias por 36 minutos (Máx. 10 jug.)"
   )
@@ -166,7 +166,7 @@ with tab_equipos:
 
 # Grafico 3 Ast v Win %
   with c3:
-    st.subheader("❑ Asistencias v Win % ")
+    st.subheader("■ Asistencias v Win % ")
     if not df_e_f.empty:
       fig3 = px.scatter(
           df_e_f,
@@ -182,7 +182,7 @@ with tab_equipos:
 
   # Grafico 4 Puntos Permitidos por Equipo
   with c4:
-    st.subheader("❑ Puntos Permitidos por Equipo ")
+    st.subheader("■ Puntos Permitidos por Equipo ")
     if not df_e_f.empty:
       df_es = df_e_f.sort_values("PTS_Permitidos")
       fig4 = px.line(
