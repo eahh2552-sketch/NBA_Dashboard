@@ -121,9 +121,9 @@ with tab_jugadores:
   st.markdown("---")
 
 # Impacto de jugador por 36 minutos
-  st.header("■  Impacto de jugador por 36 minutos")
+  st.header("Impacto de jugador por 36 minutos")
   st.subheader(
-      "5. Puntos Rebotes y Asistencias por 36 minutos (Máx. 10 jug.)"
+      "■ Puntos Rebotes y Asistencias por 36 minutos (Máx. 10 jug.)"
   )
 
   if not df_j_f.empty:
